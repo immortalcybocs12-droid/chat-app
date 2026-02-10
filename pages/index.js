@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { db } from '../utils/firebase';
+import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 
 export default function Home() {
     const [username, setUsername] = useState('');
@@ -19,24 +21,27 @@ export default function Home() {
 
         setLoading(true);
         try {
-            const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username }),
-            });
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef, where('username', '==', username));
+            const querySnapshot = await getDocs(q);
 
-            if (res.ok) {
-                const data = await res.json();
-                localStorage.setItem('chat_user', JSON.stringify(data.user));
-                router.push('/chat');
+            let userData;
+
+            if (!querySnapshot.empty) {
+                // consistent with previous logic: simple "login" by username
+                const doc = querySnapshot.docs[0];
+                userData = { id: doc.id, ...doc.data() };
             } else {
-                alert('Login failed');
+                // Create new user
+                const docRef = await addDoc(usersRef, { username });
+                userData = { id: docRef.id, username };
             }
+
+            localStorage.setItem('chat_user', JSON.stringify(userData));
+            router.push('/chat');
         } catch (error) {
-            console.error(error);
-            alert('An error occurred');
+            console.error("Login error:", error);
+            alert('Login failed. Check console.');
         } finally {
             setLoading(false);
         }
