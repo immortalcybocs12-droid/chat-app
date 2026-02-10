@@ -44,7 +44,7 @@ export default function Home() {
             router.push('/chat');
         } catch (error) {
             console.error("Login error:", error);
-            alert('Login failed. Check console.');
+            alert(`Login failed: ${error.message}`);
         } finally {
             setLoading(false);
         }
