@@ -31,6 +31,11 @@ export default function Chat() {
     // Load Users List (Real-time from Firestore)
     useEffect(() => {
         if (!user) return;
+        if (!db) {
+            alert("Firebase not initialized. Check console/environment variables.");
+            console.error("Firebase DB is undefined. Env vars missing in Netlify?");
+            return;
+        }
         const q = query(collection(db, 'users'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const usersList = snapshot.docs
@@ -84,6 +89,7 @@ export default function Chat() {
     const sendMessage = async (e) => {
         e.preventDefault();
         if ((!message.trim() && !uploading) || !selectedUser) return;
+        if (!db) return alert("Firebase not initialized.");
 
         const chatId = [user.id, selectedUser.id].sort().join('_');
         const messagesRef = collection(db, 'chats', chatId, 'messages');

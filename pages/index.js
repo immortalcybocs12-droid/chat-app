@@ -21,6 +21,9 @@ export default function Home() {
 
         setLoading(true);
         try {
+            if (!db) {
+                throw new Error("Firebase is not initialized. Please check your Environment Variables in Netlify (NEXT_PUBLIC_FIREBASE_API_KEY, etc).");
+            }
             const usersRef = collection(db, 'users');
             const q = query(usersRef, where('username', '==', username));
             const querySnapshot = await getDocs(q);
