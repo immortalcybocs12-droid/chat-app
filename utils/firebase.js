@@ -12,9 +12,30 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const db = getFirestore(app);
-const storage = getStorage(app);
-const auth = getAuth(app);
+let app;
+let db;
+let storage;
+let auth;
+
+if (typeof window !== 'undefined' && firebaseConfig.apiKey) {
+    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+    db = getFirestore(app);
+    storage = getStorage(app);
+    auth = getAuth(app);
+} else {
+    // Server-side or build-time fallback (prevent crashes)
+    // We can initialize a dummy app if absolutely needed, but usually just avoiding access is better.
+    // However, if pages import 'db', it might be undefined.
+    // Let's try to initialize app even on server if keys exist, OR just leave them undefined/null
+    // and ensure potential server-side usages check for existence.
+    // Given Next.js pages might use these in getStaticProps/getServerSideProps (which run in Node),
+    // we should only skip if keys are MISSING.
+    if (firebaseConfig.apiKey) {
+        app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+        db = getFirestore(app);
+        storage = getStorage(app);
+        auth = getAuth(app);
+    }
+}
 
 export { db, storage, auth };
