@@ -12,6 +12,17 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
+// Debugging: Log presence of keys (do not log actual values)
+if (typeof window !== 'undefined') {
+    console.log("---------------------------------------------");
+    console.log("Debugging Firebase Config:");
+    console.log(`API Key: ${firebaseConfig.apiKey ? "Ok" : "MISSING"}`);
+    console.log(`Auth Domain: ${firebaseConfig.authDomain ? "Ok" : "MISSING"}`);
+    console.log(`Project ID: ${firebaseConfig.projectId ? "Ok" : "MISSING"}`);
+    console.log("If any are MISSING, add them in Netlify Site Settings -> Environment Variables");
+    console.log("---------------------------------------------");
+}
+
 let app;
 let db;
 let storage;
